@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор оценки разработки корпоративного сайта</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #FFFFFF;
+            color: #1E293B;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #F8FAFC;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #E2E8F0;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #3B82F6;
+            margin-bottom: 32px;
+            padding: 0 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #E2E8F0;
+        }
+
+        .nav-item.active {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .user-block {
+            margin-top: auto;
+            background: #3B82F6;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3B82F6;
+            font-weight: 600;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 48px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1E293B;
+            border: 1px solid #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            background: #F8FAFC;
+        }
+
+        .btn-danger {
+            background: #FEE2E2;
+            color: #DC2626;
+            padding: 8px 12px;
+        }
+
+        .btn-danger:hover {
+            background: #FECACA;
+        }
+
+        /* Section */
+        .section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 16px 24px;
+            background: #F8FAFC;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .section-content {
+            padding: 24px;
+        }
+
+        /* Page card */
+        .page-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .page-header {
+            padding: 16px 20px;
+            background: #F8FAFC;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .page-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .page-title-input {
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            outline: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .page-title-input:focus {
+            background: white;
+            box-shadow: 0 0 0 2px #3B82F6;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chevron {
+            transition: transform 0.2s;
+        }
+
+        .chevron.expanded {
+            transform: rotate(180deg);
+        }
+
+        .page-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .page-content.expanded {
+            display: block;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: #F8FAFC;
+            color: #64748B;
+            font-weight: 500;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #E2E8F0;
+            font-size: 13px;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        tbody tr:hover {
+            background: #F1F5F9;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .total-row {
+            background: #EFF6FF !important;
+            font-weight: 600;
+        }
+
+        /* Badge */
+        .badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-easy {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-medium {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .badge-hard {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+        }
+
+        .block-category {
+            margin-bottom: 20px;
+        }
+
+        .block-category-title {
+            font-weight: 600;
+            color: #64748B;
+            margin-bottom: 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .block-item {
+            padding: 12px 16px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .block-item:hover {
+            background: #F8FAFC;
+            border-color: #3B82F6;
+        }
+
+        .block-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .block-item-hours {
+            color: #64748B;
+            font-size: 13px;
+        }
+
+        /* Summary blocks */
+        .summary-block {
+            background: #F8FAFC;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+
+        .summary-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1E293B;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #64748B;
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .final-summary {
+            background: #FFFFFF;
+            color: #1E293B;
+            border: 2px solid #3B82F6;
+        }
+
+        .final-summary .summary-label {
+            color: #64748B;
+        }
+
+        .final-summary .summary-value {
+            color: #1E293B;
+            font-size: 24px;
+        }
+
+        .final-summary .summary-title {
+            color: #3B82F6;
+        }
+
+        .final-summary .cost-display {
+            color: #3B82F6;
+        }
+
+        .cost-input {
+            padding: 8px 12px;
+            border: 2px solid #3B82F6;
+            border-radius: 8px;
+            background: #F8FAFC;
+            color: #1E293B;
+            font-size: 16px;
+            width: 120px;
+            text-align: center;
+        }
+
+        .cost-display {
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 12px;
+            color: #3B82F6;
+        }
+
+        /* Modifiers */
+        .modifier-group {
+            margin-bottom: 20px;
+        }
+
+        .modifier-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 13px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .radio-item input[type="radio"] {
+            cursor: pointer;
+        }
+
+        input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 120px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748B;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .close-btn:hover {
+            background: #F1F5F9;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #F1F5F9;
+        }
+
+        .icon-btn.delete:hover {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .collapsible-section {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            padding: 16px 20px;
+            background: #F8FAFC;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 16px 20px;
+        }
+
+        .collapsible-content.active {
+            display: block;
+        }
+
+        .work-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid #E2E8F0;
+            align-items: center;
+        }
+
+        .work-item:last-child {
+            border-bottom: none;
+        }
+
+        .work-name {
+            font-size: 14px;
+        }
+
+        .work-formula {
+            color: #64748B;
+            font-size: 13px;
+        }
+
+        .work-hours {
+            font-weight: 600;
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748B;
+        }
+
+        .integration-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .integration-checkbox:last-child {
+            border-bottom: none;
+        }
+
+        .integration-checkbox input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .separator {
+            height: 2px;
+            background: #E2E8F0;
+            margin: 32px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">Only. Calculator</div>
+            
+            <div class="nav-item active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Калькулятор
+            </div>
+            
+            <div class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Экспорт
+            </div>
+            
+            <div class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Настройки
+            </div>
+            
+            <div class="user-block">
+                <div class="user-avatar">М</div>
+                <div>
+                    <div style="font-weight: 600;">Менеджер</div>
+                    <div style="font-size: 12px; opacity: 0.9;">Отдел продаж</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Калькулятор оценки разработки сайта</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Excel
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportToPDF()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        PDF
+                    </button>
+                    <button class="btn btn-primary" onclick="saveProject()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Сохранить
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pages Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Страницы сайта</h2>
+                    <button class="btn btn-primary" onclick="addPage()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Добавить страницу
+                    </button>
+                </div>
+                <div class="section-content" id="pagesContainer">
+                    <!-- Pages will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Total for first two pages -->
+            <div class="summary-block" style="border-color: #93C5FD;">
+                <div class="summary-title">ИТОГО: ГЛАВНАЯ И ВНУТРЕННЯЯ</div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Аналитика</div>
+                        <div class="summary-value" id="firstTwoPagesAnalytics">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Дизайн</div>
+                        <div class="summary-value" id="firstTwoPagesDesign">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Front-end</div>
+                        <div class="summary-value" id="firstTwoPagesFrontend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Back-end</div>
+                        <div class="summary-value" id="firstTwoPagesBackend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Test</div>
+                        <div class="summary-value" id="firstTwoPagesTest">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label"></div>
+                        <div class="summary-value"></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">ВСЕГО</div>
+                        <div class="summary-value" id="firstTwoPagesTotal">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total for all blocks -->
+            <div class="summary-block">
+                <div class="summary-title">ИТОГО: ВСЕ СТРАНИЦЫ</div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Аналитика</div>
+                        <div class="summary-value" id="totalBlocksAnalytics">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Дизайн</div>
+                        <div class="summary-value" id="totalBlocksDesign">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Front-end</div>
+                        <div class="summary-value" id="totalBlocksFrontend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Back-end</div>
+                        <div class="summary-value" id="totalBlocksBackend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Test</div>
+                        <div class="summary-value" id="totalBlocksTest">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label"></div>
+                        <div class="summary-value"></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">ВСЕГО</div>
+                        <div class="summary-value" id="totalBlocksTotal">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Works Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Фиксированные работы</h2>
+                </div>
+                <div class="section-content">
+                    <!-- Analytics Works -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <div style="font-weight: 600;">Работы по аналитике</div>
+                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="collapsible-content active" id="analyticsWorksContent">
+                            <!-- Will be rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Design Works -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <div style="font-weight: 600;">Работы по дизайну</div>
+                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="collapsible-content" id="designWorksContent">
+                            <!-- Will be rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Frontend Works -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <div style="font-weight: 600;">Работы по разработке: Front-end</div>
+                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="collapsible-content" id="frontendWorksContent">
+                            <!-- Will be rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Backend Works -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <div style="font-weight: 600;">Работы по разработке: Back-end</div>
+                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="collapsible-content" id="backendWorksContent">
+                            <!-- Will be rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Integrations -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <div style="font-weight: 600;">Интеграции</div>
+                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="collapsible-content" id="integrationsContent">
+                            <!-- Will be rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Testing Works -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <div style="font-weight: 600;">Работы по тестированию</div>
+                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="collapsible-content" id="testingWorksContent">
+                            <!-- Will be rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Content Works -->
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <div style="font-weight: 600;">Работы по контенту</div>
+                            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="collapsible-content" id="contentWorksContent">
+                            <!-- Will be rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total with works -->
+            <div class="summary-block">
+                <div class="summary-title">ИТОГО: ЧАСЫ С РАБОТАМИ</div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Аналитика</div>
+                        <div class="summary-value" id="totalWithWorksAnalytics">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Дизайн</div>
+                        <div class="summary-value" id="totalWithWorksDesign">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Front-end</div>
+                        <div class="summary-value" id="totalWithWorksFrontend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Back-end</div>
+                        <div class="summary-value" id="totalWithWorksBackend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Test</div>
+                        <div class="summary-value" id="totalWithWorksTest">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Контент</div>
+                        <div class="summary-value" id="totalWithWorksContent">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">ВСЕГО</div>
+                        <div class="summary-value" id="totalWithWorksTotal">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modifiers Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Модификаторы проекта</h2>
+                </div>
+                <div class="section-content">
+                    <div class="modifier-group">
+                        <label class="modifier-label">АПСЕЙЛ</label>
+                        <input type="number" value="0" min="0" id="upsaleHours" onchange="calculateTotals()">
+                        <span style="margin-left: 8px; color: #64748B;">доп. часов</span>
+                    </div>
+
+                    <div class="modifier-group">
+                        <label class="modifier-label">ТЕХНОЛОГИЧЕСКИЙ СТЕК</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="techStack" value="0" checked onchange="calculateTotals()">
+                                <span>Bitrix (стандарт)</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="techStack" value="50" onchange="calculateTotals()">
+                                <span>Другое (+50 часов)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modifier-group">
+                        <label class="modifier-label">СЛОЖНОСТЬ ЗАКАЗЧИКА</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="clientComplexity" value="0" checked onchange="calculateTotals()">
+                                <span>Адекватный</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="clientComplexity" value="10" onchange="calculateTotals()">
+                                <span>Сложный (+10%)</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="clientComplexity" value="20" onchange="calculateTotals()">
+                                <span>Очень сложный (+20%)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modifier-group">
+                        <label class="modifier-label">ВНУТРЕННИЕ ЦЕЛИ</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="internalGoals" value="0" checked onchange="calculateTotals()">
+                                <span>Не интересно</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="internalGoals" value="5" onchange="calculateTotals()">
+                                <span>Интересно (+5%)</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="internalGoals" value="10" onchange="calculateTotals()">
+                                <span>Очень интересно (+10%)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modifier-group">
+                        <label class="modifier-label">РЕЛИЗ С MVP</label>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="mvp" value="0" checked onchange="calculateTotals()">
+                                <span>Без MVP</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="mvp" value="-15" onchange="calculateTotals()">
+                                <span>С MVP (-15%)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total with modifiers -->
+            <div class="summary-block">
+                <div class="summary-title">ИТОГО: С МОДИФИКАТОРАМИ</div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Аналитика</div>
+                        <div class="summary-value" id="totalModifiedAnalytics">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Дизайн</div>
+                        <div class="summary-value" id="totalModifiedDesign">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Front-end</div>
+                        <div class="summary-value" id="totalModifiedFrontend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Back-end</div>
+                        <div class="summary-value" id="totalModifiedBackend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Test</div>
+                        <div class="summary-value" id="totalModifiedTest">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Контент</div>
+                        <div class="summary-value" id="totalModifiedContent">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">ВСЕГО</div>
+                        <div class="summary-value" id="totalModifiedTotal">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Project Total -->
+            <div class="summary-block final-summary">
+                <div class="summary-title" style="font-size: 20px; text-align: center; margin-bottom: 24px;">ИТОГО ПРОЕКТ</div>
+                <div class="summary-grid" style="margin-bottom: 24px;">
+                    <div class="summary-item">
+                        <div class="summary-label">Аналитика</div>
+                        <div class="summary-value" id="finalAnalytics">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Дизайн</div>
+                        <div class="summary-value" id="finalDesign">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Front-end</div>
+                        <div class="summary-value" id="finalFrontend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Back-end</div>
+                        <div class="summary-value" id="finalBackend">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Test</div>
+                        <div class="summary-value" id="finalTest">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Контент</div>
+                        <div class="summary-value" id="finalContent">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">ВСЕГО</div>
+                        <div class="summary-value" style="font-size: 28px;" id="finalTotalHours">0</div>
+                    </div>
+                </div>
+                <div style="text-align: center; border-top: 2px solid rgba(255,255,255,0.2); padding-top: 20px;">
+                    <div style="margin-bottom: 16px;">
+                        <span style="font-size: 16px; margin-right: 12px;">Средняя ставка:</span>
+                        <input type="number" class="cost-input" value="2500" min="0" id="hourlyRate" onchange="calculateTotals()">
+                        <span style="font-size: 16px; margin-left: 8px;">₽/час</span>
+                    </div>
+                    <div class="summary-label">СТОИМОСТЬ ПРОЕКТА:</div>
+                    <div class="cost-display" id="projectCost">0 ₽</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding blocks -->
+    <div class="modal" id="blockModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить блок</h3>
+                <button class="close-btn" onclick="closeBlockModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="search-input" placeholder="Поиск блока..." id="blockSearch" oninput="filterBlocks()">
+                <div id="blocksList">
+                    <!-- Blocks will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Block database
+        const blocks = {
+            easy: [
+                { name: 'Футер (подвал)', analytics: 3.9, design: 8, frontend: 9, backend: 6, test: 5.5 },
+                { name: 'Промо-блок / баннер с СТА / Промо-шапка / Первый экран', analytics: 2, design: 9, frontend: 6, backend: 2.5, test: 5.5 },
+                { name: 'Стандартная шапка', analytics: 3, design: 8, frontend: 2, backend: 4, test: 5.5 },
+                { name: 'Текст + изображение', analytics: 1.2, design: 6, frontend: 6, backend: 2, test: 3 },
+                { name: 'Аккордеон / FAQ / Раскрывающийся список', analytics: 2, design: 3, frontend: 7, backend: 4, test: 4 },
+                { name: 'Преимущества (карточки с текстом/инфографикой, цифры)', analytics: 4, design: 18, frontend: 6, backend: 4, test: 5.5 },
+                { name: 'Листинг контактов', analytics: 6, design: 5, frontend: 6, backend: 10, test: 4 },
+                { name: 'Документы (слайдер, таблица)', analytics: 4, design: 4, frontend: 8, backend: 5, test: 5.5 },
+                { name: 'Системные страницы', analytics: 3, design: 7, frontend: 5, backend: 5, test: 5 },
+                { name: 'Прелоадер', analytics: 1, design: 4, frontend: 12, backend: 0, test: 1 }
+            ],
+            medium: [
+                { name: 'Хедер', analytics: 2, design: 4, frontend: 16, backend: 1, test: 5.5 },
+                { name: 'Мегаменю простое | Бургер-меню', analytics: 2, design: 10, frontend: 9, backend: 10, test: 4 },
+                { name: 'Шапка с виджетами', analytics: 3, design: 20, frontend: 8, backend: 4, test: 5.5 },
+                { name: 'Листинг карточек с пагинацией с превью карточек', analytics: 3, design: 4, frontend: 12, backend: 6, test: 5.5 },
+                { name: 'Слайдер карточек (универсальный)', analytics: 8, design: 6, frontend: 16, backend: 4, test: 5.5 },
+                { name: 'Статья / контентная страница', analytics: 4, design: 8, frontend: 7, backend: 5, test: 16 },
+                { name: 'Рекомендуемые материалы', analytics: 2, design: 3, frontend: 8, backend: 5, test: 5.5 },
+                { name: 'Карта интерактивная (Яндекс)', analytics: 2, design: 7, frontend: 35, backend: 2, test: 5.5 }
+            ],
+            hard: [
+                { name: 'Табы (вкладки)', analytics: 12, design: 2, frontend: 10, backend: 6, test: 14.5 },
+                { name: 'Фильтры', analytics: 6, design: 4, frontend: 20, backend: 5, test: 14.5 },
+                { name: 'Результаты поиска', analytics: 2, design: 4, frontend: 15, backend: 6, test: 5.5 },
+                { name: 'Пустое состояние поиска', analytics: 1, design: 1, frontend: 0, backend: 0, test: 0 },
+                { name: 'Форма обратной связи', analytics: 3, design: 4, frontend: 20, backend: 14, test: 6.5 }
+            ]
+        };
+
+        // State
+        let state = {
+            pages: [],
+            currentPageForBlock: null,
+            percentages: {
+                analyticsCuration: 20,
+                analyticsOperations: 10,
+                analyticsPreparation: 10,
+                designOperations: 20,
+                designUIKit: 30,
+                designUsedBlocks: -20,
+                designSupervision: 5,
+                frontendOperations: 10,
+                frontendReview: 20,
+                frontendBugs: 20,
+                frontendIntegration: 5,
+                backendOperations: 15,
+                backendReview: 5,
+                backendBugs: 20,
+                testingOperations: 10,
+                testingProd: 20
+            },
+            integrations: {
+                crm: false,
+                maps: false,
+                b24: false,
+                hh: false,
+                email: false,
+                metrics: false,
+                chat: false
+            },
+            fixedValues: {
+                // Analytics
+                analyticsBenchmark: 32,
+                analyticsBrief: 16,
+                analyticsRequirements: 8,
+                analyticsStructure: 24,
+                // Design
+                designAnimMain: 7,
+                designAnimInner: 6,
+                designAdaptMain: 7,
+                designAdaptAll: 26,
+                designUIKitMain: 7,
+                // Frontend
+                frontendSetup: 8,
+                frontendPrototypes: 6,
+                frontendAnimMain: 30,
+                frontendAnimInner: 40,
+                // Backend
+                backendSetup: 24,
+                backendMultilang: 8,
+                backendSearch: 32,
+                backendMultilangFront: 16,
+                backendSearchFront: 16,
+                // Testing
+                testingArtifacts: 2,
+                testingPrototypes: 2,
+                testingDesign: 2,
+                testingPerformance: 2,
+                testingContent: 11,
+                // Content
+                contentFill: 60,
+                contentInstruction: 16,
+                contentTZ: 32
+            },
+            customWorks: {
+                analytics: [],
+                design: [],
+                frontend: [],
+                backend: [],
+                testing: [],
+                content: [],
+                integrations: []
+            }
+        };
+
+        // Initialize
+        function init() {
+            try {
+                loadState();
+                
+                // First render fixed works to create DOM elements
+                renderFixedWorks();
+                
+                if (!state.pages || state.pages.length === 0) {
+                    state._skipCalculate = true;
+                    addPage('Главная страница');
+                    addPage('О компании');
+                    state._skipCalculate = false;
+                }
+                renderPages();
+                calculateTotals();
+            } catch(e) {
+                console.error('init error:', e);
+            }
+        }
+
+        // Page management
+        function addPage(name = null) {
+            if (state.pages.length >= 30) {
+                alert('Максимум 30 страниц');
+                return;
+            }
+            const pageName = name || `Страница ${state.pages.length + 1}`;
+            state.pages.push({
+                id: Date.now(),
+                name: pageName,
+                expanded: true,
+                blocks: []
+            });
+            renderPages();
+            if (!state._skipCalculate) {
+                calculateTotals();
+            }
+            saveState();
+        }
+
+        function deletePage(pageId) {
+            if (state.pages.length <= 1) {
+                alert('Должна остаться хотя бы одна страница');
+                return;
+            }
+            if (confirm('Удалить страницу?')) {
+                state.pages = state.pages.filter(p => p.id !== pageId);
+                renderPages();
+                calculateTotals();
+                saveState();
+            }
+        }
+
+        function togglePage(pageId) {
+            const page = state.pages.find(p => p.id === pageId);
+            if (page) {
+                page.expanded = !page.expanded;
+                renderPages();
+            }
+        }
+
+        function updatePageName(pageId, name) {
+            const page = state.pages.find(p => p.id === pageId);
+            if (page) {
+                page.name = name.substring(0, 100);
+                saveState();
+            }
+        }
+
+        // Block management
+        function openBlockModal(pageId) {
+            state.currentPageForBlock = pageId;
+            document.getElementById('blockModal').classList.add('active');
+            renderBlocksList();
+        }
+
+        function closeBlockModal() {
+            document.getElementById('blockModal').classList.remove('active');
+            state.currentPageForBlock = null;
+            document.getElementById('blockSearch').value = '';
+        }
+
+        function renderBlocksList(searchTerm = '') {
+            const container = document.getElementById('blocksList');
+            const search = searchTerm.toLowerCase();
+            
+            let html = '';
+            
+            ['easy', 'medium', 'hard'].forEach(difficulty => {
+                const difficultyName = difficulty === 'easy' ? 'ЛЕГКИЕ' : difficulty === 'medium' ? 'СРЕДНИЕ' : 'СЛОЖНЫЕ';
+                const badgeClass = difficulty === 'easy' ? 'badge-easy' : difficulty === 'medium' ? 'badge-medium' : 'badge-hard';
+                const badgeText = difficulty === 'easy' ? 'Легкий' : difficulty === 'medium' ? 'Средний' : 'Сложный';
+                
+                const filteredBlocks = blocks[difficulty].filter(b => 
+                    b.name.toLowerCase().includes(search)
+                );
+                
+                if (filteredBlocks.length > 0) {
+                    html += `<div class="block-category">
+                        <div class="block-category-title">${difficultyName}</div>`;
+                    
+                    filteredBlocks.forEach(block => {
+                        const total = block.analytics + block.design + block.frontend + block.backend + block.test;
+                        html += `
+                            <div class="block-item" onclick="addBlockToPage('${difficulty}', '${block.name.replace(/'/g, "\\'")}')">
+                                <div class="block-item-info">
+                                    <span>${block.name}</span>
+                                    <span class="badge ${badgeClass}">${badgeText}</span>
+                                </div>
+                                <div class="block-item-hours">${total.toFixed(0)}ч</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                }
+            });
+            
+            container.innerHTML = html || '<div class="empty-state">Блоки не найдены</div>';
+        }
+
+        function filterBlocks() {
+            const searchTerm = document.getElementById('blockSearch').value;
+            renderBlocksList(searchTerm);
+        }
+
+        function addBlockToPage(difficulty, blockName) {
+            const page = state.pages.find(p => p.id === state.currentPageForBlock);
+            if (!page) return;
+            
+            const blockData = blocks[difficulty].find(b => b.name === blockName);
+            if (!blockData) return;
+            
+            page.blocks.push({
+                id: Date.now(),
+                ...blockData,
+                difficulty
+            });
+            
+            closeBlockModal();
+            renderPages();
+            calculateTotals();
+            saveState();
+        }
+
+        function deleteBlock(pageId, blockId) {
+            const page = state.pages.find(p => p.id === pageId);
+            if (page) {
+                page.blocks = page.blocks.filter(b => b.id !== blockId);
+                renderPages();
+                calculateTotals();
+                saveState();
+            }
+        }
+
+        // Render functions
+        function renderPages() {
+            const container = document.getElementById('pagesContainer');
+            let html = '';
+            
+            state.pages.forEach(page => {
+                const pageTotal = {
+                    analytics: page.blocks.reduce((sum, b) => sum + b.analytics, 0),
+                    design: page.blocks.reduce((sum, b) => sum + b.design, 0),
+                    frontend: page.blocks.reduce((sum, b) => sum + b.frontend, 0),
+                    backend: page.blocks.reduce((sum, b) => sum + b.backend, 0),
+                    test: page.blocks.reduce((sum, b) => sum + b.test, 0)
+                };
+                pageTotal.total = pageTotal.analytics + pageTotal.design + pageTotal.frontend + pageTotal.backend + pageTotal.test;
+                
+                html += `
+                    <div class="page-card">
+                        <div class="page-header" onclick="togglePage(${page.id})">
+                            <div class="page-title-wrapper">
+                                <svg class="chevron ${page.expanded ? 'expanded' : ''}" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                <input type="text" class="page-title-input" value="${page.name}" onclick="event.stopPropagation()" onchange="updatePageName(${page.id}, this.value)">
+                            </div>
+                            <div class="page-actions" onclick="event.stopPropagation()">
+                                <button class="btn btn-primary" onclick="openBlockModal(${page.id})">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Блок
+                                </button>
+                                <button class="icon-btn delete" onclick="deletePage(${page.id})">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="page-content ${page.expanded ? 'expanded' : ''}">
+                            ${page.blocks.length === 0 ? '<div class="empty-state">Нет блоков. Нажмите "+ Блок" чтобы добавить.</div>' : `
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Название блока</th>
+                                            <th class="text-right">Аналитика</th>
+                                            <th class="text-right">Дизайн</th>
+                                            <th class="text-right">Front-end</th>
+                                            <th class="text-right">Back-end</th>
+                                            <th class="text-right">Test</th>
+                                            <th class="text-right">Итого</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${page.blocks.map(block => {
+                                            const total = block.analytics + block.design + block.frontend + block.backend + block.test;
+                                            const badgeClass = block.difficulty === 'easy' ? 'badge-easy' : block.difficulty === 'medium' ? 'badge-medium' : 'badge-hard';
+                                            const badgeText = block.difficulty === 'easy' ? 'Легкий' : block.difficulty === 'medium' ? 'Средний' : 'Сложный';
+                                            return `
+                                                <tr>
+                                                    <td>
+                                                        <div>${block.name}</div>
+                                                        <span class="badge ${badgeClass}">${badgeText}</span>
+                                                    </td>
+                                                    <td class="text-right">${block.analytics.toFixed(0)}</td>
+                                                    <td class="text-right">${block.design.toFixed(0)}</td>
+                                                    <td class="text-right">${block.frontend.toFixed(0)}</td>
+                                                    <td class="text-right">${block.backend.toFixed(0)}</td>
+                                                    <td class="text-right">${block.test.toFixed(0)}</td>
+                                                    <td class="text-right">${total.toFixed(0)}</td>
+                                                    <td>
+                                                        <button class="icon-btn delete" onclick="deleteBlock(${page.id}, ${block.id})">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                        <tr class="total-row">
+                                            <td><strong>ИТОГО ПО СТРАНИЦЕ:</strong></td>
+                                            <td class="text-right"><strong>${pageTotal.analytics.toFixed(0)}</strong></td>
+                                            <td class="text-right"><strong>${pageTotal.design.toFixed(0)}</strong></td>
+                                            <td class="text-right"><strong>${pageTotal.frontend.toFixed(0)}</strong></td>
+                                            <td class="text-right"><strong>${pageTotal.backend.toFixed(0)}</strong></td>
+                                            <td class="text-right"><strong>${pageTotal.test.toFixed(0)}</strong></td>
+                                            <td class="text-right"><strong>${pageTotal.total.toFixed(0)}</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function renderFixedWorks() {
+            try {
+                // Ensure elements exist
+                const analyticsEl = document.getElementById('analyticsWorksContent');
+                if (!analyticsEl) {
+                    console.error('analyticsWorksContent not found');
+                    return;
+                }
+                
+            // Analytics Works
+            analyticsEl.innerHTML = `
+                <div class="work-item">
+                    <div class="work-name">Курирование <input type="number" value="${state.percentages.analyticsCuration || 20}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.analyticsCuration=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Аналитика × ${state.percentages.analyticsCuration || 20}%</div>
+                    <div class="work-hours" id="analyticsCuration">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Операционка <input type="number" value="${state.percentages.analyticsOperations || 10}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.analyticsOperations=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Аналитика × ${state.percentages.analyticsOperations || 10}%</div>
+                    <div class="work-hours" id="analyticsOperations">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Анализ конкурентного окружения. Бенчмаркинг</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.analyticsBenchmark || 32}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.analyticsBenchmark=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Подготовка брифа и интервьюирование стейкхолдеров</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.analyticsBrief || 16}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.analyticsBrief=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Составление бизнес требований</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.analyticsRequirements || 8}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.analyticsRequirements=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Составление структуры</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.analyticsStructure}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.analyticsStructure=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Подготовка макетов к следующим этапам и сопровождение <input type="number" value="${state.percentages.analyticsPreparation}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.analyticsPreparation=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Аналитика × ${state.percentages.analyticsPreparation}%</div>
+                    <div class="work-hours" id="analyticsPreparation">0</div>
+                </div>
+                ${renderCustomWorks('analytics')}
+                ${renderAddButton('analytics')}
+            `;
+
+            // Design Works
+            document.getElementById('designWorksContent').innerHTML = `
+                <div class="work-item">
+                    <div class="work-name">Операционка <input type="number" value="${state.percentages.designOperations}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.designOperations=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Дизайн × ${state.percentages.designOperations}%</div>
+                    <div class="work-hours" id="designOperations">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Анимации главной (прелоадер/тз на анимацию)</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.designAnimMain}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.designAnimMain=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Анимация внутренних (тз на анимацию)</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.designAnimInner}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.designAnimInner=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Адаптивы (главной и 1 внутр)</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.designAdaptMain}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.designAdaptMain=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Адаптивы всех страниц</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.designAdaptAll}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.designAdaptAll=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">UI-kit (главной и 1 внутр)</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.designUIKitMain}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.designUIKitMain=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">UI-kit (общий) <input type="number" value="${state.percentages.designUIKit}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.designUIKit=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Дизайн × ${state.percentages.designUIKit}%</div>
+                    <div class="work-hours" id="designUIKit">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Использование готовых блоков <input type="number" value="${Math.abs(state.percentages.designUsedBlocks)}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.designUsedBlocks=-parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Дизайн × ${state.percentages.designUsedBlocks}% (минус)</div>
+                    <div class="work-hours" id="designUsedBlocks">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Авторский надзор <input type="number" value="${state.percentages.designSupervision}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.designSupervision=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ всего Дизайна × ${state.percentages.designSupervision}%</div>
+                    <div class="work-hours" id="designSupervision">0</div>
+                </div>
+                ${renderCustomWorks('design')}
+                ${renderAddButton('design')}
+            `;
+
+            // Frontend Works
+            document.getElementById('frontendWorksContent').innerHTML = `
+                <div class="work-item">
+                    <div class="work-name">Разворачивание проекта, перенос базовой логики</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.frontendSetup}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.frontendSetup=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Оценка прототипов</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.frontendPrototypes}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.frontendPrototypes=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Операционка <input type="number" value="${state.percentages.frontendOperations}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.frontendOperations=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Front-end × ${state.percentages.frontendOperations}%</div>
+                    <div class="work-hours" id="frontendOperations">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Ревью и курирование <input type="number" value="${state.percentages.frontendReview}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.frontendReview=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Front-end × ${state.percentages.frontendReview}%</div>
+                    <div class="work-hours" id="frontendReview">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Правка багов <input type="number" value="${state.percentages.frontendBugs}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.frontendBugs=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Front-end × ${state.percentages.frontendBugs}%</div>
+                    <div class="work-hours" id="frontendBugs">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Анимации главной страницы</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.frontendAnimMain}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.frontendAnimMain=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Анимации внутренних страниц</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.frontendAnimInner}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.frontendAnimInner=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Интеграции front и back <input type="number" value="${state.percentages.frontendIntegration}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.frontendIntegration=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Front-end × ${state.percentages.frontendIntegration}%</div>
+                    <div class="work-hours" id="frontendIntegration">0</div>
+                </div>
+                ${renderCustomWorks('frontend')}
+                ${renderAddButton('frontend')}
+            `;
+
+            // Backend Works
+            document.getElementById('backendWorksContent').innerHTML = `
+                <div class="work-item">
+                    <div class="work-name">Разворачивание проекта, перенос базовой логики</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.backendSetup}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.backendSetup=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Операционка <input type="number" value="${state.percentages.backendOperations}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.backendOperations=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Back-end × ${state.percentages.backendOperations}%</div>
+                    <div class="work-hours" id="backendOperations">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Ревью и курирование <input type="number" value="${state.percentages.backendReview}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.backendReview=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Back-end × ${state.percentages.backendReview}%</div>
+                    <div class="work-hours" id="backendReview">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Правка багов <input type="number" value="${state.percentages.backendBugs}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.backendBugs=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Back-end × ${state.percentages.backendBugs}%</div>
+                    <div class="work-hours" id="backendBugs">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Мультиязычность</div>
+                    <div class="work-formula"><input type="number" value="${state.fixedValues.backendMultilang}" min="0" style="width:50px;" onchange="state.fixedValues.backendMultilang=parseFloat(this.value);calculateTotals();saveState()"> (back) + <input type="number" value="${state.fixedValues.backendMultilangFront}" min="0" style="width:50px;" onchange="state.fixedValues.backendMultilangFront=parseFloat(this.value);calculateTotals();saveState()"> (front)</div>
+                    <div class="work-hours">${state.fixedValues.backendMultilang + state.fixedValues.backendMultilangFront}</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Базовый Поиск</div>
+                    <div class="work-formula"><input type="number" value="${state.fixedValues.backendSearch}" min="0" style="width:50px;" onchange="state.fixedValues.backendSearch=parseFloat(this.value);calculateTotals();saveState()"> (back) + <input type="number" value="${state.fixedValues.backendSearchFront}" min="0" style="width:50px;" onchange="state.fixedValues.backendSearchFront=parseFloat(this.value);calculateTotals();saveState()"> (front)</div>
+                    <div class="work-hours">${state.fixedValues.backendSearch + state.fixedValues.backendSearchFront}</div>
+                </div>
+                ${renderCustomWorks('backend')}
+                ${renderAddButton('backend')}
+            `;
+
+            // Integrations
+            document.getElementById('integrationsContent').innerHTML = `
+                <div class="integration-checkbox">
+                    <input type="checkbox" id="int_crm" ${state.integrations.crm ? 'checked' : ''} onchange="state.integrations.crm=this.checked;calculateTotals();saveState()">
+                    <label for="int_crm">Интеграция с CRM (Аналитика: 1, Дизайн: 1, Back-end: 50, Test: 10)</label>
+                </div>
+                <div class="integration-checkbox">
+                    <input type="checkbox" id="int_maps" ${state.integrations.maps ? 'checked' : ''} onchange="state.integrations.maps=this.checked;calculateTotals();saveState()">
+                    <label for="int_maps">Интеграция с Картами (Аналитика: 1, Дизайн: 1, Front-end: 16)</label>
+                </div>
+                <div class="integration-checkbox">
+                    <input type="checkbox" id="int_b24" ${state.integrations.b24 ? 'checked' : ''} onchange="state.integrations.b24=this.checked;calculateTotals();saveState()">
+                    <label for="int_b24">Интеграция с B24 (Аналитика: 1, Дизайн: 1, Back-end: 16, Test: 3.2)</label>
+                </div>
+                <div class="integration-checkbox">
+                    <input type="checkbox" id="int_hh" ${state.integrations.hh ? 'checked' : ''} onchange="state.integrations.hh=this.checked;calculateTotals();saveState()">
+                    <label for="int_hh">Интеграция с HH (Аналитика: 2, Дизайн: 2, Back-end: 24, Test: 4.8)</label>
+                </div>
+                <div class="integration-checkbox">
+                    <input type="checkbox" id="int_email" ${state.integrations.email ? 'checked' : ''} onchange="state.integrations.email=this.checked;calculateTotals();saveState()">
+                    <label for="int_email">Email-маркетинг / Подписка на рассылку (Аналитика: 1, Дизайн: 1, Back-end: 32, Test: 8)</label>
+                </div>
+                <div class="integration-checkbox">
+                    <input type="checkbox" id="int_metrics" ${state.integrations.metrics ? 'checked' : ''} onchange="state.integrations.metrics=this.checked;calculateTotals();saveState()">
+                    <label for="int_metrics">Интеграция с метрикой (Front-end: 8, Back-end: 1, Test: 0.2)</label>
+                </div>
+                <div class="integration-checkbox">
+                    <input type="checkbox" id="int_chat" ${state.integrations.chat ? 'checked' : ''} onchange="state.integrations.chat=this.checked;calculateTotals();saveState()">
+                    <label for="int_chat">Интеграция с Чатом (Front-end: 16, Back-end: 1, Test: 0.2)</label>
+                </div>
+                ${renderCustomWorks('integrations')}
+                ${renderAddButton('integrations')}
+            `;
+
+            // Testing Works
+            document.getElementById('testingWorksContent').innerHTML = `
+                <div class="work-item">
+                    <div class="work-name">Операционка <input type="number" value="${state.percentages.testingOperations}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.testingOperations=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Test × ${state.percentages.testingOperations}%</div>
+                    <div class="work-hours" id="testingOperations">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Тестирование на проде <input type="number" value="${state.percentages.testingProd}" min="0" max="100" style="width:60px;margin-left:8px;" onchange="state.percentages.testingProd=parseFloat(this.value);calculateTotals();saveState()">%</div>
+                    <div class="work-formula">= Σ Test × ${state.percentages.testingProd}%</div>
+                    <div class="work-hours" id="testingProd">0</div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Отсмотр артефактов с аналитики</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.testingArtifacts}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.testingArtifacts=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Отсмотр прототипов</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.testingPrototypes}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.testingPrototypes=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Отсмотр дизайн-макетов</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.testingDesign}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.testingDesign=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Тестирование производительности (google page inside)</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.testingPerformance}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.testingPerformance=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Тестирование собранных страниц с контентом</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.testingContent}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.testingContent=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                ${renderCustomWorks('testing')}
+                ${renderAddButton('testing')}
+            `;
+
+            // Content Works
+            document.getElementById('contentWorksContent').innerHTML = `
+                <div class="work-item">
+                    <div class="work-name">Наполнение контентом</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.contentFill}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.contentFill=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Инструкция для контент-менеджера</div>
+                    <div class="work-formula">Фиксировано</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.contentInstruction}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.contentInstruction=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                <div class="work-item">
+                    <div class="work-name">Написание Технического задания</div>
+                    <div class="work-formula">4 (Анал) + 8 (Front) + 8 (Back) + 4 (Test) + 8 (Контент)</div>
+                    <div class="work-hours"><input type="number" value="${state.fixedValues.contentTZ}" min="0" style="width:70px;text-align:right;" onchange="state.fixedValues.contentTZ=parseFloat(this.value);calculateTotals();saveState()"></div>
+                </div>
+                ${renderCustomWorks('content')}
+                ${renderAddButton('content')}
+            `;
+            } catch (e) {
+                console.error('renderFixedWorks error:', e);
+            }
+        }
+
+        // Calculate totals
+        function calculateTotals() {
+            // 1. Calculate blocks total
+            const blocksTotal = {
+                analytics: 0,
+                design: 0,
+                frontend: 0,
+                backend: 0,
+                test: 0
+            };
+
+            state.pages.forEach(page => {
+                page.blocks.forEach(block => {
+                    blocksTotal.analytics += block.analytics;
+                    blocksTotal.design += block.design;
+                    blocksTotal.frontend += block.frontend;
+                    blocksTotal.backend += block.backend;
+                    blocksTotal.test += block.test;
+                });
+            });
+
+            const blocksTotalSum = blocksTotal.analytics + blocksTotal.design + blocksTotal.frontend + blocksTotal.backend + blocksTotal.test;
+
+            // Update blocks total display
+            document.getElementById('totalBlocksAnalytics').textContent = blocksTotal.analytics.toFixed(0);
+            document.getElementById('totalBlocksDesign').textContent = blocksTotal.design.toFixed(0);
+            document.getElementById('totalBlocksFrontend').textContent = blocksTotal.frontend.toFixed(0);
+            document.getElementById('totalBlocksBackend').textContent = blocksTotal.backend.toFixed(0);
+            document.getElementById('totalBlocksTest').textContent = blocksTotal.test.toFixed(0);
+            document.getElementById('totalBlocksTotal').textContent = blocksTotalSum.toFixed(0);
+
+            // Calculate first two pages total
+            const firstTwo = state.pages.slice(0, 2);
+            let ft = { analytics: 0, design: 0, frontend: 0, backend: 0, test: 0 };
+            firstTwo.forEach(p => p.blocks.forEach(b => {
+                ft.analytics += b.analytics;
+                ft.design += b.design;
+                ft.frontend += b.frontend;
+                ft.backend += b.backend;
+                ft.test += b.test;
+            }));
+            document.getElementById('firstTwoPagesAnalytics').textContent = ft.analytics.toFixed(0);
+            document.getElementById('firstTwoPagesDesign').textContent = ft.design.toFixed(0);
+            document.getElementById('firstTwoPagesFrontend').textContent = ft.frontend.toFixed(0);
+            document.getElementById('firstTwoPagesBackend').textContent = ft.backend.toFixed(0);
+            document.getElementById('firstTwoPagesTest').textContent = ft.test.toFixed(0);
+            document.getElementById('firstTwoPagesTotal').textContent = (ft.analytics + ft.design + ft.frontend + ft.backend + ft.test).toFixed(0);
+
+            // 2. Calculate fixed works
+            const fixedWorks = {
+                analytics: 0,
+                design: 0,
+                frontend: 0,
+                backend: 0,
+                test: 0,
+                content: 0
+            };
+
+            // Analytics works
+            const analyticsCuration = blocksTotal.analytics * (state.percentages.analyticsCuration / 100);
+            const analyticsOperations = blocksTotal.analytics * (state.percentages.analyticsOperations / 100);
+            const analyticsPreparation = blocksTotal.analytics * (state.percentages.analyticsPreparation / 100);
+            
+            fixedWorks.analytics = analyticsCuration + analyticsOperations + state.fixedValues.analyticsBenchmark + state.fixedValues.analyticsBrief + state.fixedValues.analyticsRequirements + state.fixedValues.analyticsStructure + analyticsPreparation;
+
+            document.getElementById('analyticsCuration').textContent = analyticsCuration.toFixed(0);
+            document.getElementById('analyticsOperations').textContent = analyticsOperations.toFixed(0);
+            document.getElementById('analyticsPreparation').textContent = analyticsPreparation.toFixed(0);
+
+            // Design works
+            const designOperations = blocksTotal.design * (state.percentages.designOperations / 100);
+            const designUIKit = blocksTotal.design * (state.percentages.designUIKit / 100);
+            const designUsedBlocks = blocksTotal.design * (state.percentages.designUsedBlocks / 100);
+            const designBeforeSupervision = blocksTotal.design + designOperations + state.fixedValues.designAnimMain + state.fixedValues.designAnimInner + state.fixedValues.designAdaptMain + state.fixedValues.designAdaptAll + state.fixedValues.designUIKitMain + designUIKit + designUsedBlocks;
+            const designSupervision = designBeforeSupervision * (state.percentages.designSupervision / 100);
+            
+            fixedWorks.design = designBeforeSupervision + designSupervision;
+
+            document.getElementById('designOperations').textContent = designOperations.toFixed(0);
+            document.getElementById('designUIKit').textContent = designUIKit.toFixed(0);
+            document.getElementById('designUsedBlocks').textContent = designUsedBlocks.toFixed(0);
+            document.getElementById('designSupervision').textContent = designSupervision.toFixed(0);
+
+            // Frontend works
+            const frontendOperations = blocksTotal.frontend * (state.percentages.frontendOperations / 100);
+            const frontendReview = blocksTotal.frontend * (state.percentages.frontendReview / 100);
+            const frontendBugs = blocksTotal.frontend * (state.percentages.frontendBugs / 100);
+            const frontendIntegration = blocksTotal.frontend * (state.percentages.frontendIntegration / 100);
+            
+            fixedWorks.frontend = state.fixedValues.frontendSetup + state.fixedValues.frontendPrototypes + frontendOperations + frontendReview + frontendBugs + state.fixedValues.frontendAnimMain + state.fixedValues.frontendAnimInner + frontendIntegration;
+
+            document.getElementById('frontendOperations').textContent = frontendOperations.toFixed(0);
+            document.getElementById('frontendReview').textContent = frontendReview.toFixed(0);
+            document.getElementById('frontendBugs').textContent = frontendBugs.toFixed(0);
+            document.getElementById('frontendIntegration').textContent = frontendIntegration.toFixed(0);
+
+            // Backend works
+            const backendOperations = blocksTotal.backend * (state.percentages.backendOperations / 100);
+            const backendReview = blocksTotal.backend * (state.percentages.backendReview / 100);
+            const backendBugs = blocksTotal.backend * (state.percentages.backendBugs / 100);
+            
+            fixedWorks.backend = state.fixedValues.backendSetup + backendOperations + backendReview + backendBugs + state.fixedValues.backendMultilang + state.fixedValues.backendSearch;
+            fixedWorks.frontend += state.fixedValues.backendMultilangFront + state.fixedValues.backendSearchFront;
+
+            document.getElementById('backendOperations').textContent = backendOperations.toFixed(0);
+            document.getElementById('backendReview').textContent = backendReview.toFixed(0);
+            document.getElementById('backendBugs').textContent = backendBugs.toFixed(0);
+
+            // Integrations
+            if (state.integrations.crm) {
+                fixedWorks.analytics += 1;
+                fixedWorks.design += 1;
+                fixedWorks.backend += 50;
+                fixedWorks.test += 10;
+            }
+            if (state.integrations.maps) {
+                fixedWorks.analytics += 1;
+                fixedWorks.design += 1;
+                fixedWorks.frontend += 16;
+            }
+            if (state.integrations.b24) {
+                fixedWorks.analytics += 1;
+                fixedWorks.design += 1;
+                fixedWorks.backend += 16;
+                fixedWorks.test += 3.2;
+            }
+            if (state.integrations.hh) {
+                fixedWorks.analytics += 2;
+                fixedWorks.design += 2;
+                fixedWorks.backend += 24;
+                fixedWorks.test += 4.8;
+            }
+            if (state.integrations.email) {
+                fixedWorks.analytics += 1;
+                fixedWorks.design += 1;
+                fixedWorks.backend += 32;
+                fixedWorks.test += 8;
+            }
+            if (state.integrations.metrics) {
+                fixedWorks.frontend += 8;
+                fixedWorks.backend += 1;
+                fixedWorks.test += 0.2;
+            }
+            if (state.integrations.chat) {
+                fixedWorks.frontend += 16;
+                fixedWorks.backend += 1;
+                fixedWorks.test += 0.2;
+            }
+
+            // Testing works
+            const testingOperations = blocksTotal.test * (state.percentages.testingOperations / 100);
+            const testingProd = blocksTotal.test * (state.percentages.testingProd / 100);
+            
+            fixedWorks.test += testingOperations + testingProd + state.fixedValues.testingArtifacts + state.fixedValues.testingPrototypes + state.fixedValues.testingDesign + state.fixedValues.testingPerformance + state.fixedValues.testingContent;
+
+            document.getElementById('testingOperations').textContent = testingOperations.toFixed(0);
+            document.getElementById('testingProd').textContent = testingProd.toFixed(0);
+
+            // Content works
+            fixedWorks.content = state.fixedValues.contentFill + state.fixedValues.contentInstruction + 8;
+            fixedWorks.analytics += 4;
+            fixedWorks.frontend += 8;
+            fixedWorks.backend += 8;
+            fixedWorks.test += 4;
+
+            // Add custom works
+            if (state.customWorks) {
+                (state.customWorks.analytics || []).forEach(w => fixedWorks.analytics += w.hours);
+                (state.customWorks.design || []).forEach(w => fixedWorks.design += w.hours);
+                (state.customWorks.frontend || []).forEach(w => fixedWorks.frontend += w.hours);
+                (state.customWorks.backend || []).forEach(w => fixedWorks.backend += w.hours);
+                (state.customWorks.testing || []).forEach(w => fixedWorks.test += w.hours);
+                (state.customWorks.content || []).forEach(w => fixedWorks.content += w.hours);
+                (state.customWorks.integrations || []).forEach(w => fixedWorks.backend += w.hours);
+            }
+
+            // 3. Total with works
+            const totalWithWorks = {
+                analytics: blocksTotal.analytics + fixedWorks.analytics,
+                design: blocksTotal.design + fixedWorks.design,
+                frontend: blocksTotal.frontend + fixedWorks.frontend,
+                backend: blocksTotal.backend + fixedWorks.backend,
+                test: blocksTotal.test + fixedWorks.test,
+                content: fixedWorks.content
+            };
+
+            const totalWithWorksSum = totalWithWorks.analytics + totalWithWorks.design + totalWithWorks.frontend + totalWithWorks.backend + totalWithWorks.test + totalWithWorks.content;
+
+            document.getElementById('totalWithWorksAnalytics').textContent = totalWithWorks.analytics.toFixed(0);
+            document.getElementById('totalWithWorksDesign').textContent = totalWithWorks.design.toFixed(0);
+            document.getElementById('totalWithWorksFrontend').textContent = totalWithWorks.frontend.toFixed(0);
+            document.getElementById('totalWithWorksBackend').textContent = totalWithWorks.backend.toFixed(0);
+            document.getElementById('totalWithWorksTest').textContent = totalWithWorks.test.toFixed(0);
+            document.getElementById('totalWithWorksContent').textContent = totalWithWorks.content.toFixed(0);
+            document.getElementById('totalWithWorksTotal').textContent = totalWithWorksSum.toFixed(0);
+
+            // 4. Apply modifiers
+            const upsaleHours = parseFloat(document.getElementById('upsaleHours').value) || 0;
+            const techStackHours = parseFloat(document.querySelector('input[name="techStack"]:checked').value) || 0;
+            const clientComplexity = parseFloat(document.querySelector('input[name="clientComplexity"]:checked').value) || 0;
+            const internalGoals = parseFloat(document.querySelector('input[name="internalGoals"]:checked').value) || 0;
+            const mvp = parseFloat(document.querySelector('input[name="mvp"]:checked').value) || 0;
+
+            const percentageModifier = 1 + (clientComplexity / 100) + (internalGoals / 100) + (mvp / 100);
+
+            const totalModified = {
+                analytics: totalWithWorks.analytics * percentageModifier,
+                design: totalWithWorks.design * percentageModifier,
+                frontend: totalWithWorks.frontend * percentageModifier,
+                backend: totalWithWorks.backend * percentageModifier,
+                test: totalWithWorks.test * percentageModifier,
+                content: totalWithWorks.content * percentageModifier
+            };
+
+            const totalModifiedSum = totalModified.analytics + totalModified.design + totalModified.frontend + totalModified.backend + totalModified.test + totalModified.content + upsaleHours + techStackHours;
+
+            document.getElementById('totalModifiedAnalytics').textContent = totalModified.analytics.toFixed(0);
+            document.getElementById('totalModifiedDesign').textContent = totalModified.design.toFixed(0);
+            document.getElementById('totalModifiedFrontend').textContent = totalModified.frontend.toFixed(0);
+            document.getElementById('totalModifiedBackend').textContent = totalModified.backend.toFixed(0);
+            document.getElementById('totalModifiedTest').textContent = totalModified.test.toFixed(0);
+            document.getElementById('totalModifiedContent').textContent = totalModified.content.toFixed(0);
+            document.getElementById('totalModifiedTotal').textContent = totalModifiedSum.toFixed(0);
+
+            // 5. Final project total
+            document.getElementById('finalAnalytics').textContent = totalModified.analytics.toFixed(0);
+            document.getElementById('finalDesign').textContent = totalModified.design.toFixed(0);
+            document.getElementById('finalFrontend').textContent = totalModified.frontend.toFixed(0);
+            document.getElementById('finalBackend').textContent = totalModified.backend.toFixed(0);
+            document.getElementById('finalTest').textContent = totalModified.test.toFixed(0);
+            document.getElementById('finalContent').textContent = totalModified.content.toFixed(0);
+            document.getElementById('finalTotalHours').textContent = totalModifiedSum.toFixed(0);
+
+            // Calculate cost
+            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value) || 2500;
+            const projectCost = totalModifiedSum * hourlyRate;
+            document.getElementById('projectCost').textContent = projectCost.toLocaleString('ru-RU') + ' ₽';
+        }
+
+        // Collapsible sections
+        function toggleCollapsible(header) {
+            const content = header.nextElementSibling;
+            const chevron = header.querySelector('.chevron');
+            content.classList.toggle('active');
+            chevron.classList.toggle('expanded');
+        }
+
+        // State management
+        function saveState() {
+            localStorage.setItem('calculatorState', JSON.stringify(state));
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('calculatorState');
+                if (saved) {
+                    const loaded = JSON.parse(saved);
+                    // Only load pages if they exist
+                    if (loaded.pages && loaded.pages.length > 0) {
+                        state.pages = loaded.pages;
+                    }
+                    // Merge percentages
+                    if (loaded.percentages) {
+                        Object.keys(loaded.percentages).forEach(key => {
+                            state.percentages[key] = loaded.percentages[key];
+                        });
+                    }
+                    // Merge fixedValues
+                    if (loaded.fixedValues) {
+                        Object.keys(loaded.fixedValues).forEach(key => {
+                            state.fixedValues[key] = loaded.fixedValues[key];
+                        });
+                    }
+                    // Merge integrations
+                    if (loaded.integrations) {
+                        Object.keys(loaded.integrations).forEach(key => {
+                            state.integrations[key] = loaded.integrations[key];
+                        });
+                    }
+                    // Merge customWorks
+                    if (loaded.customWorks) {
+                        Object.keys(loaded.customWorks).forEach(key => {
+                            if (Array.isArray(loaded.customWorks[key])) {
+                                state.customWorks[key] = loaded.customWorks[key];
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('loadState error:', e);
+            }
+        }
+
+        // Custom works management
+        function addCustomWork(category) {
+            if (!state.customWorks[category]) {
+                state.customWorks[category] = [];
+            }
+            state.customWorks[category].push({
+                id: Date.now(),
+                name: 'Новая работа',
+                hours: 0
+            });
+            renderFixedWorks();
+            calculateTotals();
+            saveState();
+        }
+
+        function updateCustomWorkName(category, id, name) {
+            const work = state.customWorks[category].find(w => w.id === id);
+            if (work) {
+                work.name = name;
+                saveState();
+            }
+        }
+
+        function updateCustomWorkHours(category, id, hours) {
+            const work = state.customWorks[category].find(w => w.id === id);
+            if (work) {
+                work.hours = parseFloat(hours) || 0;
+                calculateTotals();
+                saveState();
+            }
+        }
+
+        function deleteCustomWork(category, id) {
+            state.customWorks[category] = state.customWorks[category].filter(w => w.id !== id);
+            renderFixedWorks();
+            calculateTotals();
+            saveState();
+        }
+
+        function renderCustomWorks(category) {
+            if (!state.customWorks || !state.customWorks[category]) return '';
+            const works = state.customWorks[category] || [];
+            return works.map(work => `
+                <div class="work-item">
+                    <div class="work-name"><input type="text" value="${work.name || ''}" style="width:250px;border:1px solid #E2E8F0;border-radius:4px;padding:4px 8px;" onchange="updateCustomWorkName('${category}', ${work.id}, this.value)"></div>
+                    <div class="work-formula">Добавлено</div>
+                    <div class="work-hours" style="display:flex;align-items:center;gap:8px;">
+                        <input type="number" value="${work.hours || 0}" min="0" style="width:70px;text-align:right;" onchange="updateCustomWorkHours('${category}', ${work.id}, this.value)">
+                        <button class="icon-btn delete" onclick="deleteCustomWork('${category}', ${work.id})" style="padding:4px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAddButton(category) {
+            return `
+                <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #E2E8F0;">
+                    <button class="btn btn-secondary" onclick="addCustomWork('${category}')" style="width:100%;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Добавить работу
+                    </button>
+                </div>
+            `;
+        }
+
+        function saveProject() {
+            saveState();
+            alert('Проект сохранен!');
+        }
+
+        // Export functions
+        function exportToExcel() {
+            // Calculate all values
+            const blocksTotal = { analytics: 0, design: 0, frontend: 0, backend: 0, test: 0 };
+            state.pages.forEach(page => {
+                page.blocks.forEach(block => {
+                    blocksTotal.analytics += block.analytics;
+                    blocksTotal.design += block.design;
+                    blocksTotal.frontend += block.frontend;
+                    blocksTotal.backend += block.backend;
+                    blocksTotal.test += block.test;
+                });
+            });
+
+            // First two pages (main + inner)
+            const firstTwo = state.pages.slice(0, 2);
+            const firstTwoTotal = { analytics: 0, design: 0, frontend: 0, backend: 0, test: 0 };
+            firstTwo.forEach(p => p.blocks.forEach(b => {
+                firstTwoTotal.analytics += b.analytics;
+                firstTwoTotal.design += b.design;
+                firstTwoTotal.frontend += b.frontend;
+                firstTwoTotal.backend += b.backend;
+                firstTwoTotal.test += b.test;
+            }));
+
+            // Rest pages (without first two)
+            const restPages = state.pages.slice(2);
+            const restTotal = { analytics: 0, design: 0, frontend: 0, backend: 0, test: 0 };
+            restPages.forEach(p => p.blocks.forEach(b => {
+                restTotal.analytics += b.analytics;
+                restTotal.design += b.design;
+                restTotal.frontend += b.frontend;
+                restTotal.backend += b.backend;
+                restTotal.test += b.test;
+            }));
+
+            // Fixed works calculations
+            const analyticsCuration = blocksTotal.analytics * (state.percentages.analyticsCuration / 100);
+            const analyticsOperations = blocksTotal.analytics * (state.percentages.analyticsOperations / 100);
+            const analyticsPreparation = blocksTotal.analytics * (state.percentages.analyticsPreparation / 100);
+            
+            const designOperations = blocksTotal.design * (state.percentages.designOperations / 100);
+            const designUIKit = blocksTotal.design * (state.percentages.designUIKit / 100);
+            const designUsedBlocks = blocksTotal.design * (state.percentages.designUsedBlocks / 100);
+            
+            const frontendOperations = blocksTotal.frontend * (state.percentages.frontendOperations / 100);
+            const frontendReview = blocksTotal.frontend * (state.percentages.frontendReview / 100);
+            const frontendBugs = blocksTotal.frontend * (state.percentages.frontendBugs / 100);
+            const frontendIntegration = blocksTotal.frontend * (state.percentages.frontendIntegration / 100);
+            
+            const backendOperations = blocksTotal.backend * (state.percentages.backendOperations / 100);
+            const backendReview = blocksTotal.backend * (state.percentages.backendReview / 100);
+            const backendBugs = blocksTotal.backend * (state.percentages.backendBugs / 100);
+            
+            const testingOperations = blocksTotal.test * (state.percentages.testingOperations / 100);
+            const testingProd = blocksTotal.test * (state.percentages.testingProd / 100);
+
+            // Custom works totals
+            const customAnalytics = (state.customWorks.analytics || []).reduce((sum, w) => sum + w.hours, 0);
+            const customDesign = (state.customWorks.design || []).reduce((sum, w) => sum + w.hours, 0);
+            const customFrontend = (state.customWorks.frontend || []).reduce((sum, w) => sum + w.hours, 0);
+            const customBackend = (state.customWorks.backend || []).reduce((sum, w) => sum + w.hours, 0);
+            const customTesting = (state.customWorks.testing || []).reduce((sum, w) => sum + w.hours, 0);
+            const customContent = (state.customWorks.content || []).reduce((sum, w) => sum + w.hours, 0);
+
+            // Build export data
+            const data = [
+                ['Экспорт калькулятора'],
+                ['Структура задач', '', '', 'Наименование задач', 'Трудозатраты в часах'],
+                [],
+                ['1', 'Планирование', '', '', ''],
+                ['1.1', '', 'Предпроектная аналитика', '', Math.round(
+                    analyticsCuration + analyticsOperations + 
+                    state.fixedValues.analyticsBenchmark + state.fixedValues.analyticsBrief + 
+                    state.fixedValues.analyticsRequirements + state.fixedValues.analyticsStructure + 
+                    analyticsPreparation + customAnalytics
+                )],
+                ['1.1.1', '', '', 'Курирование', Math.round(analyticsCuration)],
+                ['1.1.2', '', '', 'Операционка', Math.round(analyticsOperations)],
+                ['1.1.3', '', '', 'Анализ конкурентного окружения. Бенчмаркинг', Math.round(state.fixedValues.analyticsBenchmark)],
+                ['1.1.4', '', '', 'Подготовка брифа и интервьюирование', Math.round(state.fixedValues.analyticsBrief)],
+                ['1.1.5', '', '', 'Составление бизнес требований', Math.round(state.fixedValues.analyticsRequirements)],
+                ['1.1.6', '', '', 'Составление структуры', Math.round(state.fixedValues.analyticsStructure)],
+                ['1.1.7', '', '', 'Подготовка макетов к следующим этапам', Math.round(analyticsPreparation)],
+            ];
+
+            // Add custom analytics works
+            let analyticsIdx = 8;
+            (state.customWorks.analytics || []).forEach((w, i) => {
+                data.push(['1.1.' + analyticsIdx, '', '', w.name, Math.round(w.hours)]);
+                analyticsIdx++;
+            });
+
+            // Проектирование
+            data.push([]);
+            data.push(['1.2', '', 'Проектирование', '', Math.round(firstTwoTotal.analytics + restTotal.analytics)]);
+            data.push(['1.2.1', '', '', 'Прототип главной и одной внутренней', Math.round(firstTwoTotal.analytics)]);
+            data.push(['1.2.2', '', '', 'Прототип внутренних страниц', Math.round(restTotal.analytics)]);
+
+            // Дизайн
+            const designFixedTotal = designOperations + state.fixedValues.designAnimMain + state.fixedValues.designAnimInner + 
+                state.fixedValues.designAdaptMain + state.fixedValues.designAdaptAll + state.fixedValues.designUIKitMain + 
+                designUIKit + designUsedBlocks + customDesign;
+            
+            data.push([]);
+            data.push(['1.3', '', 'Дизайн', '', Math.round(firstTwoTotal.design + restTotal.design + designFixedTotal)]);
+            data.push(['1.3.1', '', '', 'Дизайн-макет главной и одной внутренней', Math.round(firstTwoTotal.design)]);
+            data.push(['1.3.2', '', '', 'Дизайн-макет внутренних страниц', Math.round(restTotal.design)]);
+            data.push(['1.3.3', '', '', 'Операционка', Math.round(designOperations)]);
+            data.push(['1.3.4', '', '', 'Анимации главной страницы', Math.round(state.fixedValues.designAnimMain)]);
+            data.push(['1.3.5', '', '', 'Анимации внутренних страниц', Math.round(state.fixedValues.designAnimInner)]);
+            data.push(['1.3.6', '', '', 'Адаптивы (главная и 1 внутренняя)', Math.round(state.fixedValues.designAdaptMain)]);
+            data.push(['1.3.7', '', '', 'Адаптивы всех страниц', Math.round(state.fixedValues.designAdaptAll)]);
+            data.push(['1.3.8', '', '', 'UI-kit (главная и 1 внутренняя)', Math.round(state.fixedValues.designUIKitMain)]);
+            data.push(['1.3.9', '', '', 'UI-kit (общий)', Math.round(designUIKit)]);
+            data.push(['1.3.10', '', '', 'Использование готовых блоков', Math.round(designUsedBlocks)]);
+
+            // Add custom design works
+            let designIdx = 11;
+            (state.customWorks.design || []).forEach((w, i) => {
+                data.push(['1.3.' + designIdx, '', '', w.name, Math.round(w.hours)]);
+                designIdx++;
+            });
+
+            // Front-end
+            const frontendFixedTotal = state.fixedValues.frontendSetup + state.fixedValues.frontendPrototypes + 
+                frontendOperations + frontendReview + frontendBugs + 
+                state.fixedValues.frontendAnimMain + state.fixedValues.frontendAnimInner + 
+                frontendIntegration + customFrontend;
+            
+            data.push([]);
+            data.push(['1.4', '', 'Front-end', '', Math.round(firstTwoTotal.frontend + restTotal.frontend + frontendFixedTotal)]);
+            data.push(['1.4.1', '', '', 'Front-end главной и одной внутренней', Math.round(firstTwoTotal.frontend)]);
+            data.push(['1.4.2', '', '', 'Front-end внутренних страниц', Math.round(restTotal.frontend)]);
+            data.push(['1.4.3', '', '', 'Разворачивание проекта', Math.round(state.fixedValues.frontendSetup)]);
+            data.push(['1.4.4', '', '', 'Оценка прототипов', Math.round(state.fixedValues.frontendPrototypes)]);
+            data.push(['1.4.5', '', '', 'Операционка', Math.round(frontendOperations)]);
+            data.push(['1.4.6', '', '', 'Ревью и курирование', Math.round(frontendReview)]);
+            data.push(['1.4.7', '', '', 'Правка багов', Math.round(frontendBugs)]);
+            data.push(['1.4.8', '', '', 'Анимации главной страницы', Math.round(state.fixedValues.frontendAnimMain)]);
+            data.push(['1.4.9', '', '', 'Анимации внутренних страниц', Math.round(state.fixedValues.frontendAnimInner)]);
+            data.push(['1.4.10', '', '', 'Интеграции front и back', Math.round(frontendIntegration)]);
+
+            // Add custom frontend works
+            let frontendIdx = 11;
+            (state.customWorks.frontend || []).forEach((w, i) => {
+                data.push(['1.4.' + frontendIdx, '', '', w.name, Math.round(w.hours)]);
+                frontendIdx++;
+            });
+
+            // Back-end
+            const backendFixedTotal = state.fixedValues.backendSetup + backendOperations + backendReview + backendBugs + 
+                state.fixedValues.backendMultilang + state.fixedValues.backendMultilangFront + 
+                state.fixedValues.backendSearch + state.fixedValues.backendSearchFront + customBackend;
+            
+            data.push([]);
+            data.push(['1.5', '', 'Back-end', '', Math.round(firstTwoTotal.backend + restTotal.backend + backendFixedTotal)]);
+            data.push(['1.5.1', '', '', 'Back-end главной и одной внутренней', Math.round(firstTwoTotal.backend)]);
+            data.push(['1.5.2', '', '', 'Back-end внутренних страниц', Math.round(restTotal.backend)]);
+            data.push(['1.5.3', '', '', 'Разворачивание проекта', Math.round(state.fixedValues.backendSetup)]);
+            data.push(['1.5.4', '', '', 'Операционка', Math.round(backendOperations)]);
+            data.push(['1.5.5', '', '', 'Ревью и курирование', Math.round(backendReview)]);
+            data.push(['1.5.6', '', '', 'Правка багов', Math.round(backendBugs)]);
+            data.push(['1.5.7', '', '', 'Мультиязычность', Math.round(state.fixedValues.backendMultilang + state.fixedValues.backendMultilangFront)]);
+            data.push(['1.5.8', '', '', 'Базовый Поиск', Math.round(state.fixedValues.backendSearch + state.fixedValues.backendSearchFront)]);
+
+            // Add custom backend works
+            let backendIdx = 9;
+            (state.customWorks.backend || []).forEach((w, i) => {
+                data.push(['1.5.' + backendIdx, '', '', w.name, Math.round(w.hours)]);
+                backendIdx++;
+            });
+
+            // Тестирование
+            const testingFixedTotal = testingOperations + testingProd + 
+                state.fixedValues.testingArtifacts + state.fixedValues.testingPrototypes + 
+                state.fixedValues.testingDesign + state.fixedValues.testingPerformance + 
+                state.fixedValues.testingContent + customTesting;
+            
+            data.push([]);
+            data.push(['1.6', '', 'Тестирование', '', Math.round(firstTwoTotal.test + restTotal.test + testingFixedTotal)]);
+            data.push(['1.6.1', '', '', 'Тестирование главной и одной внутренней', Math.round(firstTwoTotal.test)]);
+            data.push(['1.6.2', '', '', 'Тестирование внутренних страниц', Math.round(restTotal.test)]);
+            data.push(['1.6.3', '', '', 'Операционка', Math.round(testingOperations)]);
+            data.push(['1.6.4', '', '', 'Тестирование на проде', Math.round(testingProd)]);
+            data.push(['1.6.5', '', '', 'Отсмотр артефактов с аналитики', Math.round(state.fixedValues.testingArtifacts)]);
+            data.push(['1.6.6', '', '', 'Отсмотр прототипов', Math.round(state.fixedValues.testingPrototypes)]);
+            data.push(['1.6.7', '', '', 'Отсмотр дизайн-макетов', Math.round(state.fixedValues.testingDesign)]);
+            data.push(['1.6.8', '', '', 'Тестирование производительности', Math.round(state.fixedValues.testingPerformance)]);
+            data.push(['1.6.9', '', '', 'Тестирование с контентом', Math.round(state.fixedValues.testingContent)]);
+
+            // Add custom testing works
+            let testingIdx = 10;
+            (state.customWorks.testing || []).forEach((w, i) => {
+                data.push(['1.6.' + testingIdx, '', '', w.name, Math.round(w.hours)]);
+                testingIdx++;
+            });
+
+            // Контент
+            data.push([]);
+            data.push(['1.7', '', 'Контент', '', Math.round(state.fixedValues.contentFill + state.fixedValues.contentInstruction + customContent)]);
+            data.push(['1.7.1', '', '', 'Наполнение контентом', Math.round(state.fixedValues.contentFill)]);
+            data.push(['1.7.2', '', '', 'Инструкция для контент-менеджера', Math.round(state.fixedValues.contentInstruction)]);
+
+            // Add custom content works
+            let contentIdx = 3;
+            (state.customWorks.content || []).forEach((w, i) => {
+                data.push(['1.7.' + contentIdx, '', '', w.name, Math.round(w.hours)]);
+                contentIdx++;
+            });
+
+            // Create workbook and export
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 10 },  // A
+                { wch: 15 },  // B
+                { wch: 25 },  // C
+                { wch: 45 },  // D
+                { wch: 20 }   // E
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Оценка');
+            XLSX.writeFile(wb, 'calculator-export.xlsx');
+        }
+
+        function exportToPDF() {
+            alert('Функция экспорта в PDF будет доступна в следующей версии');
+        }
+
+        // Initialize app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
